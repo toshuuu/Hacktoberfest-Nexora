@@ -5,8 +5,10 @@
   "description": "CLI engine for git-cure — repository telemetry and guarded execution",
   "main": "./src/index.ts",
   "scripts": {
+    "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "start": "ts-node src/index.ts"
+    "start": "ts-node src/index.ts",
+    "test": "tsc && node --test dist/telemetry.test.js dist/detector.test.js dist/snapshot.test.js dist/validator.test.js dist/executor.test.js dist/index.test.js"
   },
   "dependencies": {
     "@git-cure/shared": "*"

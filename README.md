@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # git-cure
 
 **Terminal-native Git diagnostics and recovery powered by Gemma.**
@@ -75,12 +74,11 @@ The CLI integration and Gemma API calls are **not yet implemented**.
 ## Installation
 
 ```bash
-git clone <YOUR_GITHUB_REPOSITORY_URL>
+git clone https://github.com/toshuuu/Hacktoberfest-Nexora
 cd git-cure
 npm install
 ```
 
-> Replace `<YOUR_GITHUB_REPOSITORY_URL>` with the URL of your GitHub repository.
 
 ---
 

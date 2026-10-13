@@ -131,7 +131,7 @@ git-cure/
 |----------|-------------------|------------------------------|
 | 1        | Dashboard         | `apps/dashboard/`            |
 | 2        | CLI engine        | `packages/cli/`              |
-| 3        | Gemma engine      | `services/gemma/`            |
+| 3,4      | Gemma engine      | `services/gemma/`            |
 
 See `docs/TEAM_WORKFLOW.md` for branch strategy and integration points.
 
@@ -166,9 +166,8 @@ git init
 git add .
 git commit -m "chore: initialize git-cure project foundation"
 git branch -M main
-git remote add origin <YOUR_GITHUB_REPOSITORY_URL>
+git remote add origin <https://github.com/toshuuu/Hacktoberfest-Nexora>
 git push -u origin main
 ```
 
-> Replace `(https://github.com/toshuuu/Hacktoberfest-Nexora)` with the actual URL of your newly created GitHub repository. Do not commit until the repository exists on GitHub.
-=======
+

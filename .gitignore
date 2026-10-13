@@ -33,3 +33,8 @@ Thumbs.db
 # OS
 .DS_Store
 Desktop.ini
+
+powershell.cmd
+.env
+.env.local
+

@@ -1,30 +1,90 @@
+import { gemmaModel } from './client';
+import { buildDiagnosisPrompt, buildRecoveryPlanPrompt } from './prompts';
+import { parseDiagnosisResponse, parseRecoveryPlanResponse } from './parser';
+import { fallbackDiagnosis, fallbackRecoveryPlan, sortStepsByRisk } from './planner';
+import { validateDiagnosis, validateRecoveryPlan } from './validator';
+import type { RepositoryStatus, DiagnosticResult, RecoveryStep } from '@git-cure/shared';
+
 /**
- * @git-cure/gemma — entry point
- *
- * Phase 3 (Gemma engine) will implement:
- *   - Structured prompt construction from RepositoryStatus telemetry
- *   - Gemma API calls (Google AI SDK or compatible endpoint)
- *   - Schema validation on model output → DiagnosticResult
- *   - Risk classification and confidence scoring
- *   - Recovery recipe generation → RecoveryStep[]
- *   - Retry / fallback logic for malformed model responses
- *
- * Nothing here makes API requests. This file is a placeholder so the
- * workspace resolves and TypeScript is satisfied.
+ * Analyze repository status and generate diagnosis using Gemma.
  */
-
-import type { DiagnosticResult, RecoveryStep, RepositoryStatus } from "@git-cure/shared";
-
-// TODO(gemma): implement structured prompt and Gemma API call
-export async function diagnose(
-  _status: RepositoryStatus
+export async function diagnoseWithGemma(
+  repoStatus: RepositoryStatus
 ): Promise<DiagnosticResult> {
-  throw new Error("diagnose: not yet implemented (Phase 3)");
+  console.log('🤖 Asking Gemma for diagnosis...');
+
+  const prompt = buildDiagnosisPrompt(repoStatus);
+
+  try {
+    const result = await gemmaModel.generateContent(prompt);
+    const response = typeof result.response?.text === 'function' 
+      ? result.response.text() 
+      : String(result);
+
+    console.log('✓ Gemma responded');
+
+    const diagnosis = parseDiagnosisResponse(response);
+    const validation = validateDiagnosis(diagnosis);
+    if (!validation.isValid) {
+      console.warn('⚠️ Diagnosis validation warnings:', validation.errors);
+    }
+    return diagnosis;
+  } catch (error) {
+    console.error('Gemma diagnosis failed:', error);
+
+    // Fallback to rule-based diagnosis
+    return fallbackDiagnosis(repoStatus);
+  }
 }
 
-// TODO(gemma): implement recovery plan generation from diagnosis
-export async function buildRecoveryPlan(
-  _diagnosis: DiagnosticResult
+/**
+ * Generate recovery plan using Gemma.
+ */
+export async function generateRecoveryPlan(
+  repoStatus: RepositoryStatus,
+  diagnosis: DiagnosticResult
 ): Promise<RecoveryStep[]> {
-  throw new Error("buildRecoveryPlan: not yet implemented (Phase 3)");
+  console.log('🤖 Asking Gemma for recovery plan...');
+
+  const prompt = buildRecoveryPlanPrompt(repoStatus, diagnosis);
+
+  try {
+    const result = await gemmaModel.generateContent(prompt);
+    const response = typeof result.response?.text === 'function' 
+      ? result.response.text() 
+      : String(result);
+
+    console.log('✓ Gemma responded with recovery plan');
+
+    const plan = parseRecoveryPlanResponse(response);
+    if (!plan || plan.length === 0) {
+      console.warn('AI generated empty plan, falling back to rule-based recipe.');
+      return fallbackRecoveryPlan(diagnosis, repoStatus);
+    }
+
+    const validation = validateRecoveryPlan(plan);
+    if (!validation.isValid) {
+      console.warn('⚠️ Recovery plan validation warnings:', validation.errors);
+    }
+
+    return sortStepsByRisk(plan);
+  } catch (error) {
+    console.error('Gemma recovery plan failed:', error);
+
+    // Fallback to rule-based plan
+    return fallbackRecoveryPlan(diagnosis, repoStatus);
+  }
 }
+
+// Re-export helper and parser functions for testing and consumers
+export {
+  parseDiagnosisResponse,
+  parseRecoveryPlanResponse,
+  fallbackDiagnosis,
+  fallbackRecoveryPlan,
+  validateDiagnosis,
+  validateRecoveryPlan,
+  buildDiagnosisPrompt,
+  buildRecoveryPlanPrompt,
+  sortStepsByRisk,
+};

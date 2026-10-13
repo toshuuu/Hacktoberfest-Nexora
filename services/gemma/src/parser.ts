@@ -100,8 +100,8 @@ export function parseRecoveryPlanResponse(response: string): RecoveryStep[] {
         riskLevel,
         status: 'pending',
         requiresApproval: step.requiresApproval !== undefined ? Boolean(step.requiresApproval) : isDangerous,
-        expectedOutcome: step.expectedOutcome || '',
         rollback: {
+          description: step.rollback?.description || (step.command ? `Rollback for ${step.command}` : 'No rollback action needed'),
           canGuaranteeRestoration: step.rollback?.canGuaranteeRestoration ?? false,
           warningMessage: step.rollback?.warningMessage || (isDangerous ? 'Rollback may not restore all state' : ''),
           ...(step.rollback?.command ? { command: step.rollback.command } : {}),

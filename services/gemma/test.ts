@@ -9,9 +9,11 @@ import {
 import type { RepositoryStatus } from '@git-cure/shared';
 
 const mockStatus: RepositoryStatus = {
+  repoPath: process.cwd(),
   repoName: 'test-repo',
   currentBranch: 'main',
   headCommit: 'abc123',
+  isDetachedHead: false,
   workingTreeStatus: 'conflicted',
   stagedCount: 0,
   unstagedCount: 3,

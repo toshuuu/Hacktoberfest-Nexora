@@ -5,11 +5,12 @@ import type { RepositoryStatus } from '@git-cure/shared';
  */
 export function buildDiagnosisPrompt(repoStatus: RepositoryStatus): string {
   const extraContext: string[] = [];
-  if (repoStatus.diffSummary) {
-    extraContext.push(`- Diff Summary: ${repoStatus.diffSummary}`);
+  const anyStatus = repoStatus as any;
+  if (anyStatus.diffSummary) {
+    extraContext.push(`- Diff Summary: ${anyStatus.diffSummary}`);
   }
-  if (repoStatus.detectedSecrets && repoStatus.detectedSecrets.length > 0) {
-    extraContext.push(`- Detected Secrets/Sensitive Files: ${repoStatus.detectedSecrets.join(', ')}`);
+  if (Array.isArray(anyStatus.detectedSecrets) && anyStatus.detectedSecrets.length > 0) {
+    extraContext.push(`- Detected Secrets/Sensitive Files: ${anyStatus.detectedSecrets.join(', ')}`);
   }
   if (repoStatus.headCommit) {
     extraContext.push(`- HEAD Commit: ${repoStatus.headCommit}`);

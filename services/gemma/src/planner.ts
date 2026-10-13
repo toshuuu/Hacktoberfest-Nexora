@@ -40,14 +40,15 @@ export function fallbackDiagnosis(repoStatus: RepositoryStatus): DiagnosticResul
   }
 
   // Case 2: Sensitive files / secrets detected
-  if (repoStatus.detectedSecrets && repoStatus.detectedSecrets.length > 0) {
-    const secretFile = repoStatus.detectedSecrets[0];
+  const anyStatus = repoStatus as any;
+  if (Array.isArray(anyStatus.detectedSecrets) && anyStatus.detectedSecrets.length > 0) {
+    const secretFile = anyStatus.detectedSecrets[0];
     return {
       issue: 'Sensitive credentials or secret keys detected in repository',
       rootCause: `File "${secretFile}" matches patterns for private secrets and is present in the repository.`,
       riskLevel: 'red',
       confidence: 0.98,
-      affectedFiles: repoStatus.detectedSecrets,
+      affectedFiles: anyStatus.detectedSecrets,
       recommendedActions: [
         `Untrack ${secretFile} from git`,
         `Add ${secretFile} to .gitignore`,
@@ -57,7 +58,7 @@ export function fallbackDiagnosis(repoStatus: RepositoryStatus): DiagnosticResul
   }
 
   // Case 3: Detached HEAD state
-  if (repoStatus.currentBranch === 'HEAD' || repoStatus.currentBranch.includes('detached')) {
+  if (repoStatus.isDetachedHead || repoStatus.currentBranch === 'HEAD' || repoStatus.currentBranch.includes('detached')) {
     return {
       issue: 'Detached HEAD state',
       rootCause: 'You are not currently on any branch. This can happen after checking out a commit directly.',
@@ -118,8 +119,8 @@ export function fallbackRecoveryPlan(
         riskLevel: 'green',
         status: 'pending',
         requiresApproval: false,
-        expectedOutcome: 'See list of files needing manual resolution',
         rollback: {
+          description: 'No rollback needed for read-only command',
           canGuaranteeRestoration: true,
           warningMessage: '',
         },
@@ -132,8 +133,8 @@ export function fallbackRecoveryPlan(
         riskLevel: 'green',
         status: 'pending',
         requiresApproval: false,
-        expectedOutcome: 'Inspect conflict markers (<<<<<<<, =======, >>>>>>>)',
         rollback: {
+          description: 'No rollback needed for read-only command',
           canGuaranteeRestoration: true,
           warningMessage: '',
         },
@@ -146,8 +147,8 @@ export function fallbackRecoveryPlan(
         riskLevel: 'amber',
         status: 'pending',
         requiresApproval: true,
-        expectedOutcome: 'Merge is cancelled cleanly with no conflict state left',
         rollback: {
+          description: 'Cannot undo merge abort; must re-initiate merge',
           canGuaranteeRestoration: false,
           warningMessage: 'Aborting merge discards current in-progress conflict resolution',
         },
@@ -166,8 +167,8 @@ export function fallbackRecoveryPlan(
         riskLevel: 'green',
         status: 'pending',
         requiresApproval: false,
-        expectedOutcome: 'Confirmed commit hash and current detached state',
         rollback: {
+          description: 'No rollback needed for read-only command',
           canGuaranteeRestoration: true,
           warningMessage: '',
         },
@@ -180,8 +181,8 @@ export function fallbackRecoveryPlan(
         riskLevel: 'green',
         status: 'pending',
         requiresApproval: false,
-        expectedOutcome: 'Commits are safely pinned to a named branch',
         rollback: {
+          description: 'Switch back to detached HEAD commit',
           canGuaranteeRestoration: true,
           warningMessage: '',
           command: 'git switch -',
@@ -202,8 +203,8 @@ export function fallbackRecoveryPlan(
         riskLevel: 'amber',
         status: 'pending',
         requiresApproval: false,
-        expectedOutcome: `${file} is removed from git staging and will not be pushed`,
         rollback: {
+          description: `Re-stage ${file}`,
           canGuaranteeRestoration: true,
           warningMessage: '',
           command: `git add ${file}`,
@@ -217,8 +218,8 @@ export function fallbackRecoveryPlan(
         riskLevel: 'green',
         status: 'pending',
         requiresApproval: false,
-        expectedOutcome: `${file} safely ignored in .gitignore`,
         rollback: {
+          description: 'Remove rule from .gitignore manually if needed',
           canGuaranteeRestoration: true,
           warningMessage: '',
         },
@@ -231,10 +232,11 @@ export function fallbackRecoveryPlan(
         riskLevel: 'green',
         status: 'pending',
         requiresApproval: false,
-        expectedOutcome: '.gitignore is staged',
         rollback: {
+          description: 'Unstage .gitignore',
           canGuaranteeRestoration: true,
           warningMessage: '',
+          command: 'git restore --staged .gitignore',
         },
       },
     ];
@@ -251,8 +253,8 @@ export function fallbackRecoveryPlan(
         riskLevel: 'green',
         status: 'pending',
         requiresApproval: false,
-        expectedOutcome: 'Summary of working tree modifications',
         rollback: {
+          description: 'No rollback needed for read-only status check',
           canGuaranteeRestoration: true,
           warningMessage: '',
         },
@@ -265,8 +267,8 @@ export function fallbackRecoveryPlan(
         riskLevel: 'green',
         status: 'pending',
         requiresApproval: false,
-        expectedOutcome: 'Working tree is cleanly restored; changes can be re-applied with git stash pop',
         rollback: {
+          description: 'Pop stashed changes back into working tree',
           canGuaranteeRestoration: true,
           warningMessage: '',
           command: 'git stash pop',

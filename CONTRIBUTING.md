@@ -1,6 +1,6 @@
 # Contributing to git-cure
 
-We are a three-person hackathon team. Keep things simple and predictable.
+We are a four-person hackathon team. Keep things simple and predictable.
 
 ---
 

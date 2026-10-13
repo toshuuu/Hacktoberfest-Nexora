@@ -14,9 +14,6 @@
  *   import { socket, EVENTS } from "@/services/socket";
  *   socket.on(EVENTS.LOG_APPENDED, (entry) => { ... });
  *   socket.emit(EVENTS.APPROVAL_GRANTED, { stepId, approvedAt });
- *
- * INTEGRATION: Replace the stub `on` handlers below with real React state updates
- * once the CLI server is running and the dashboard needs live data.
  */
 
 import { io, Socket } from "socket.io-client";
@@ -97,8 +94,8 @@ export function grantApproval(stepId: string): void {
 
 // ---------------------------------------------------------------------------
 // Connection lifecycle logging (dev only)
-// INTEGRATION: Wire these into a connection-status atom / context when the
-// server is running.
+// Listeners are intentionally minimal here — OverviewPage owns state updates
+// via its own on/off pairs registered in useEffect, so there is no duplication.
 // ---------------------------------------------------------------------------
 
 socket.on("connect", () => {
@@ -112,44 +109,4 @@ socket.on("disconnect", (reason: string) => {
 socket.on("connect_error", (err: Error) => {
   // Expected when the CLI server is not running; surfaced as a UI indicator.
   console.warn("[socket] connect_error", err.message);
-});
-
-// ---------------------------------------------------------------------------
-// Stub handlers — replace with real state updates (Phase 2)
-// ---------------------------------------------------------------------------
-
-socket.on(EVENTS.REPO_STATUS_UPDATED, (_status: RepositoryStatus) => {
-  // INTEGRATION: update repoStatus state
-});
-
-socket.on(EVENTS.DIAGNOSIS_READY, (_diagnosis: DiagnosticResult) => {
-  // INTEGRATION: update diagnosis state
-});
-
-socket.on(EVENTS.RECOVERY_PLAN_READY, (_plan: RecoveryStep[]) => {
-  // INTEGRATION: update recoveryPlan state
-});
-
-socket.on(EVENTS.STEP_STATUS_CHANGED, (_step: RecoveryStep) => {
-  // INTEGRATION: update the matching step in recoveryPlan state
-});
-
-socket.on(EVENTS.SNAPSHOT_CREATED, (_snapshot: SnapshotMetadata) => {
-  // INTEGRATION: update snapshot state
-});
-
-socket.on(EVENTS.LOG_APPENDED, (_entry: ExecutionLog) => {
-  // INTEGRATION: append to log state
-});
-
-socket.on(EVENTS.VERIFICATION_COMPLETE, (_results: VerificationResult[]) => {
-  // INTEGRATION: update verification state
-});
-
-socket.on(EVENTS.SESSION_STARTED, (_payload: { sessionId: string; startedAt: string }) => {
-  // INTEGRATION: set session as active
-});
-
-socket.on(EVENTS.SESSION_ENDED, (_payload: { sessionId: string; endedAt: string; reason: string }) => {
-  // INTEGRATION: mark session as ended
 });

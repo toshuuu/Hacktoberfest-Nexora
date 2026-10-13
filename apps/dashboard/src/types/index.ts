@@ -6,6 +6,7 @@
 export type {
   DiagnosticResult,
   ExecutionLog,
+  LogLevel,
   RecoveryStep,
   RepositoryStatus,
   RiskLevel,
